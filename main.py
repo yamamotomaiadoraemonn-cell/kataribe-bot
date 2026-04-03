@@ -13,10 +13,17 @@ from linebot.v3.webhooks import MessageEvent, TextMessageContent, ImageMessageCo
 
 app = Flask(__name__)
 
-configuration = Configuration(access_token=os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', '').strip())
-handler = WebhookHandler(os.environ.get('LINE_CHANNEL_SECRET', '').strip())
-anthropic_client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY', '').strip())
+LINE_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', '').strip()
+LINE_SECRET = os.environ.get('LINE_CHANNEL_SECRET', '').strip()
+ANTHROPIC_KEY = os.environ.get('ANTHROPIC_API_KEY', '').strip()
 
+configuration = Configuration(access_token=LINE_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_SECRET)
+anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
+
+@app.route("/")
+def index():
+    return "Kataribe Bot is running!"
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -43,7 +50,7 @@ def handle_text(event):
 def handle_image(event):
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
-        headers = {'Authorization': f'Bearer {os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")}'}
+        headers = {'Authorization': f'Bearer {LINE_ACCESS_TOKEN}'}
         url = f'https://api-data.line.me/v2/bot/message/{event.message.id}/content'
         image_data = base64.b64encode(httpx.get(url, headers=headers).content).decode('utf-8')
         response = anthropic_client.messages.create(
@@ -64,6 +71,3 @@ def handle_image(event):
                 messages=[TextMessage(text=reply_text)]
             )
         )
-
-if __name__ == "__main__":
-    app.run()
