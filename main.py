@@ -13,8 +13,8 @@ from linebot.v3.webhooks import MessageEvent, TextMessageContent, ImageMessageCo
 
 app = Flask(__name__)
 
-configuration = Configuration(access_token=os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'))
-handler = WebhookHandler(os.environ.get('LINE_CHANNEL_SECRET'))
+configuration = Configuration(access_token=os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', '').strip())
+handler = WebhookHandler(os.environ.get('LINE_CHANNEL_SECRET', '').strip()
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
 
 @app.route("/callback", methods=['POST'])
